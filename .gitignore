@@ -49,3 +49,6 @@ build/
 ### CMake Patch ###
 # External projects
 *-prefix/
+
+### VSCode ###
+.vscode/
