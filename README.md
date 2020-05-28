@@ -17,6 +17,6 @@ $ cmake -DCORE_BUILD_TYPE=Single ..
 $ cmake -DCORE_BUILD_TYPE=Multi ..
 ```
 
-If you built using `Single` you will find the various binaries in the 
+The resulting binary (or binaries) will be available in `build/bin`
 
 The current setup of this project is just a "proof of concept" and will be expanded upon later.  
