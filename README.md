@@ -15,6 +15,7 @@ $ cd build
 $ cmake -DCORE_BUILD_TYPE=Single ..
 - OR -
 $ cmake -DCORE_BUILD_TYPE=Multi ..
+$ make
 ```
 
 The resulting binary (or binaries) will be available in `build/bin`
