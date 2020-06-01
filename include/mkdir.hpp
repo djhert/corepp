@@ -1,14 +1,16 @@
 #ifndef __COREMKDIR_HPP__
 #define __COREMKDIR_HPP__
 
-#include "corepp.hpp"
+#include "cmd.hpp"
 
 #include <filesystem>
 
 namespace corepp {
-class mkdir {
+class mkdir : public cmd {
 public:
-	static int Mkdir();
+	mkdir(){};
+	~mkdir(){};
+	int Run(int argc, char *argv[]) override;
 };
 } // namespace corepp
 

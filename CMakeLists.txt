@@ -31,11 +31,34 @@ ELSE()
     SET(C_FLAGS "${C_FLAGS} -g -D_DEBUG -Wall")
 ENDIF()
 
+FILE(GLOB SOURCES ${PROJECT_SOURCE_DIR}/src/*.c**)
+
+IF(NOT CORE_BUILD_TYPE)
+  SET(CORE_BUILD_TYPE Multi)
+ENDIF()
+
 IF(CORE_BUILD_TYPE MATCHES Single)
-    SET(C_FLAGS "${C_FLAGS} -DSINGLE_CALL")
-ELSE()
+  SET(C_FLAGS "${C_FLAGS} -DSINGLE_CALL")
+  FOREACH(tool ${SOURCES})
+    GET_FILENAME_COMPONENT(toolname ${tool} NAME)
+    STRING(REPLACE ".cpp" "" toolname ${toolname})
+    IF((NOT ${toolname} MATCHES "multicall") AND (NOT ${toolname} MATCHES "cmd"))
+      ADD_EXECUTABLE(${toolname} ${tool} "src/cmd.cpp")
+
+      TARGET_COMPILE_FEATURES(${toolname} PUBLIC cxx_std_17)
+
+      TARGET_INCLUDE_DIRECTORIES(${toolname}
+        PUBLIC
+        ${INCLUDE_DIR}
+	)
+
+      # Set compile flags
+      SET_PROPERTY(TARGET ${toolname} APPEND_STRING PROPERTY COMPILE_FLAGS ${C_FLAGS})
+      SET_PROPERTY(TARGET ${toolname} APPEND_STRING PROPERTY LINK_FLAGS ${L_FLAGS})
+    ENDIF()
+  ENDFOREACH()
+ELSEIF(CORE_BUILD_TYPE MATCHES Multi)
     SET(C_FLAGS "${C_FLAGS} -DMULTI_CALL")
-    FILE(GLOB_RECURSE SOURCES ${PROJECT_SOURCE_DIR}/src/cmd/*.c**)
     ADD_EXECUTABLE(${PROJECTNAME} ${SOURCES})
     TARGET_COMPILE_FEATURES(${PROJECTNAME} PUBLIC cxx_std_17)
 
@@ -47,27 +70,17 @@ ELSE()
     # Set compile flags
     SET_PROPERTY(TARGET ${PROJECTNAME} APPEND_STRING PROPERTY COMPILE_FLAGS ${C_FLAGS})
     SET_PROPERTY(TARGET ${PROJECTNAME} APPEND_STRING PROPERTY LINK_FLAGS ${L_FLAGS})
-ENDIF()
-
-
-## Macro to search subdirectories and return list
-MACRO(SUBDIRS result curdir)
-  FILE(GLOB children RELATIVE ${curdir} ${curdir}/*)
-  SET(dirlist "")
-  FOREACH(child ${children})
-    IF(IS_DIRECTORY ${curdir}/${child})
-      LIST(APPEND dirlist ${child})
+    FOREACH(tool ${SOURCES})
+    GET_FILENAME_COMPONENT(toolname ${tool} NAME)
+    STRING(REPLACE ".cpp" "" toolname ${toolname})
+    IF((NOT ${toolname} MATCHES "multicall") AND (NOT ${toolname} MATCHES "cmd"))
+      ADD_CUSTOM_TARGET(${toolname} 
+      ALL
+      COMMAND ${CMAKE_COMMAND} -E create_symlink ${PROJECTNAME} ${OUTPATH}/${toolname})  
+      ADD_DEPENDENCIES(${toolname} ${PROJECTNAME})
     ENDIF()
-  ENDFOREACH()
-  SET(${result} ${dirlist})
-ENDMACRO()
+    ENDFOREACH()
 
-SUBDIRS(subdirs ${PROJECT_SOURCE_DIR}/src)
-FOREACH(subdir ${subdirs})
-  SET(binarydir ${PROJECT_BINARY_DIR}/${subdir})
-  SET(fullsubdir ${PROJECT_SOURCE_DIR}/src/${subdir})
-  IF(NOT ${subdir} MATCHES "cmd")
-    ADD_SUBDIRECTORY(${fullsubdir} ${binarydir})
-    MESSAGE(STATUS "Module: " ${subdir})
-  ENDIF()
-ENDFOREACH()
+    ELSE()
+    MESSAGE(FATAL_ERROR "Invalid Build Type \"${CORE_BUILD_TYPE}\"   Valid types are Single or Multi")
+ENDIF()
