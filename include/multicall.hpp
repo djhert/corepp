@@ -3,6 +3,7 @@
 #define __MULTICALL_HPP__
 
 #include <algorithm>
+#include <cstring>
 
 #include "cmd.hpp"
 #include "corepp.hpp"
@@ -26,7 +27,7 @@ private:
 	multicall(const multicall &other) = delete;
 	multicall &operator=(const multicall &other) = delete;
 
-	std::unordered_map<const char *, std::unique_ptr<cmd> (*)()> _commands;
+	std::unordered_map<std::string, std::unique_ptr<cmd> (*)()> _commands;
 };
 
 } // namespace corepp
