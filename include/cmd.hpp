@@ -13,6 +13,11 @@ public:
 	virtual int Run(int argc, char *argv[]);
 
 	static void badFlag(const char *argv0, const char &flag);
+
+	template <typename T>
+	static std::unique_ptr<cmd> Create() {
+		return std::unique_ptr<cmd>(new T());
+	}
 };
 } // namespace corepp
 #endif

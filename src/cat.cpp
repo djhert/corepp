@@ -4,7 +4,7 @@ using namespace corepp;
 
 #ifdef SINGLE_CALL
 int main(int argc, char *argv[]) {
-	std::unique_ptr<cat> cur(new cat());
+	std::unique_ptr<cmd> cur = cmd::Create<cat>();
 	cur->Run(argc, argv);
 	return 0;
 }
@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
 
 #ifdef MULTI_CALL
 #include "multicall.hpp"
-static multicmd<cat> maker("cat");
+bool cat::_reg = multicall::Register("cat", cmd::Create<cat>);
 #endif
 
 int cat::Run(int argc, char *argv[]) {

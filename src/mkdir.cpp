@@ -4,7 +4,7 @@ using namespace corepp;
 
 #ifdef SINGLE_CALL
 int main(int argc, char *argv[]) {
-	std::unique_ptr<mkdir> cur(new mkdir());
+	std::unique_ptr<cmd> cur = cmd::Create<mkdir>();
 	cur->Run(argc, argv);
 	return 0;
 }
@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
 
 #ifdef MULTI_CALL
 #include "multicall.hpp"
-static multicmd<mkdir> maker("mkdir");
+bool mkdir::_reg = multicall::Register("mkdir", cmd::Create<mkdir>);
 #endif
 
 int mkdir::Run(int argc, char *argv[]) {

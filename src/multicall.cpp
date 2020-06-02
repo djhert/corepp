@@ -6,9 +6,9 @@ using namespace corepp;
 
 int main(int argc, char *argv[]) {
 	std::cout << "Using: " << argv[0] << std::endl;
-	std::string _used(argv[0]);
-	std::size_t _found = _used.find_last_of("/\\");
-	_used = _used.substr(_found + 1);
+	std::string _usecmd(argv[0]);
+	std::size_t _found = _usecmd.find_last_of("/\\");
+	const char *_used = _usecmd.substr(_found + 1).c_str();
 	std::cout << "Command: " << _used << std::endl;
 	std::unique_ptr<cmd> _cmd = multicall::Instance().Call(_used);
 	if (!_cmd) {
@@ -17,6 +17,7 @@ int main(int argc, char *argv[]) {
 		return -1;
 	}
 	return _cmd->Run(argc, argv);
+	return 0;
 }
 
 multicall::~multicall() {
@@ -28,17 +29,18 @@ multicall &multicall::Instance() {
 	return instance;
 }
 
-std::unique_ptr<cmd> multicall::Call(const std::string &name) {
+std::unique_ptr<cmd> multicall::Call(const char *name) {
 	auto i = _commands.find(name);
 	if (i == _commands.end()) {
 		return nullptr;
 	}
-	return i->second->Create();
+	return i->second();
 }
 
-void multicall::Register(const std::string &name, imulticmd *command) {
+bool multicall::Register(const char *name, std::unique_ptr<cmd> (*f)()) {
+	Instance()._commands[name] = f;
 	std::cout << "[registering] " << name << std::endl;
-	_commands[name] = command;
+	return true;
 }
 
 #endif
